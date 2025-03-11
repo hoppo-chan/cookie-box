@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cookie Storage Share 测试页面</title>
+    <style>
+      body {
+        font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+      }
+      h2 {
+        color: #444;
+        margin-top: 20px;
+      }
+      .section {
+        margin-bottom: 30px;
+        padding: 15px;
+        border: 1px solid #eee;
+        border-radius: 5px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 5px;
+        margin-bottom: 5px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .data-display {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px;
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: monospace;
+        white-space: pre-wrap;
+      }
+      .status {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 4px;
+      }
+      .success {
+        background-color: #dff0d8;
+        color: #3c763d;
+      }
+      .error {
+        background-color: #f2dede;
+        color: #a94442;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Cookie Storage 测试页面</h1>
+
+      <div class="section">
+        <h2>Cookie 操作</h2>
+        <div class="form-group">
+          <label for="cookieName">Cookie 名称:</label>
+          <input type="text" id="cookieName" placeholder="输入 Cookie 名称" />
+        </div>
+        <div class="form-group">
+          <label for="cookieValue">Cookie 值:</label>
+          <input type="text" id="cookieValue" placeholder="输入 Cookie 值" />
+        </div>
+        <div class="form-group">
+          <label for="cookieExpires">过期天数 (可选):</label>
+          <input
+            type="number"
+            id="cookieExpires"
+            placeholder="留空为会话 Cookie"
+          />
+        </div>
+        <div class="form-group">
+          <button onclick="setCookieTest()">设置 Cookie</button>
+          <button onclick="getAllCookiesTest()">获取所有 Cookies</button>
+          <button onclick="deleteCookieTest()">删除 Cookie</button>
+        </div>
+        <div class="status" id="cookieStatus"></div>
+        <h3>当前 Cookies:</h3>
+        <div class="data-display" id="cookieDisplay"></div>
+      </div>
+
+      <div class="section">
+        <h2>本地存储 (localStorage) 操作</h2>
+        <div class="form-group">
+          <label for="localStorageKey">键:</label>
+          <input type="text" id="localStorageKey" placeholder="输入存储键" />
+        </div>
+        <div class="form-group">
+          <label for="localStorageValue">值:</label>
+          <input type="text" id="localStorageValue" placeholder="输入存储值" />
+        </div>
+        <div class="form-group">
+          <button onclick="setLocalStorageTest()">设置本地存储</button>
+          <button onclick="getLocalStorageTest()">获取所有本地存储</button>
+          <button onclick="clearLocalStorageItemTest()">删除本地存储项</button>
+          <button onclick="clearAllLocalStorageTest()">清除所有本地存储</button>
+        </div>
+        <div class="status" id="localStorageStatus"></div>
+        <h3>当前本地存储:</h3>
+        <div class="data-display" id="localStorageDisplay"></div>
+      </div>
+
+      <div class="section">
+        <h2>会话存储 (sessionStorage) 操作</h2>
+        <div class="form-group">
+          <label for="sessionStorageKey">键:</label>
+          <input type="text" id="sessionStorageKey" placeholder="输入存储键" />
+        </div>
+        <div class="form-group">
+          <label for="sessionStorageValue">值:</label>
+          <input
+            type="text"
+            id="sessionStorageValue"
+            placeholder="输入存储值"
+          />
+        </div>
+        <div class="form-group">
+          <button onclick="setSessionStorageTest()">设置会话存储</button>
+          <button onclick="getSessionStorageTest()">获取所有会话存储</button>
+          <button onclick="clearSessionStorageItemTest()">
+            删除会话存储项
+          </button>
+          <button onclick="clearAllSessionStorageTest()">
+            清除所有会话存储
+          </button>
+        </div>
+        <div class="status" id="sessionStorageStatus"></div>
+        <h3>当前会话存储:</h3>
+        <div class="data-display" id="sessionStorageDisplay"></div>
+      </div>
+
+      <div class="section">
+        <h2>批量操作</h2>
+        <button onclick="setTestData()">设置测试数据</button>
+        <button onclick="clearAllData()">清除所有数据</button>
+        <div class="status" id="batchStatus"></div>
+      </div>
+    </div>
+
+    <script>
+      // Cookie 操作函数
+      function setCookieTest() {
+        const name = document.getElementById("cookieName").value;
+        const value = document.getElementById("cookieValue").value;
+        const expires = document.getElementById("cookieExpires").value;
+
+        if (!name || !value) {
+          showStatus("cookieStatus", "请输入Cookie名称和值", "error");
+          return;
+        }
+
+        let cookieString = `${encodeURIComponent(name)}=${encodeURIComponent(
+          value
+        )}; path=/`;
+
+        if (expires) {
+          const expiryDate = new Date();
+          expiryDate.setDate(expiryDate.getDate() + parseInt(expires));
+          cookieString += `; expires=${expiryDate.toUTCString()}`;
+        }
+
+        document.cookie = cookieString;
+        showStatus("cookieStatus", `已设置Cookie: ${name}=${value}`, "success");
+        getAllCookiesTest();
+      }
+
+      function getAllCookiesTest() {
+        const cookies = document.cookie
+          .split(";")
+          .map((cookie) => cookie.trim());
+        let cookieObj = {};
+
+        cookies.forEach((cookie) => {
+          if (cookie) {
+            const parts = cookie.split("=");
+            const name = decodeURIComponent(parts[0]);
+            const value = parts.length > 1 ? decodeURIComponent(parts[1]) : "";
+            cookieObj[name] = value;
+          }
+        });
+
+        document.getElementById("cookieDisplay").textContent = JSON.stringify(
+          cookieObj,
+          null,
+          2
+        );
+      }
+
+      function deleteCookieTest() {
+        const name = document.getElementById("cookieName").value;
+
+        if (!name) {
+          showStatus("cookieStatus", "请输入要删除的Cookie名称", "error");
+          return;
+        }
+
+        document.cookie = `${encodeURIComponent(
+          name
+        )}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        showStatus("cookieStatus", `已删除Cookie: ${name}`, "success");
+        getAllCookiesTest();
+      }
+
+      // LocalStorage 操作函数
+      function setLocalStorageTest() {
+        const key = document.getElementById("localStorageKey").value;
+        const value = document.getElementById("localStorageValue").value;
+
+        if (!key || !value) {
+          showStatus("localStorageStatus", "请输入键和值", "error");
+          return;
+        }
+
+        try {
+          localStorage.setItem(key, value);
+          showStatus(
+            "localStorageStatus",
+            `已设置本地存储: ${key}=${value}`,
+            "success"
+          );
+          getLocalStorageTest();
+        } catch (e) {
+          showStatus(
+            "localStorageStatus",
+            `设置本地存储失败: ${e.message}`,
+            "error"
+          );
+        }
+      }
+
+      function getLocalStorageTest() {
+        try {
+          const storageObj = {};
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            storageObj[key] = localStorage.getItem(key);
+          }
+          document.getElementById("localStorageDisplay").textContent =
+            JSON.stringify(storageObj, null, 2);
+        } catch (e) {
+          showStatus(
+            "localStorageStatus",
+            `获取本地存储失败: ${e.message}`,
+            "error"
+          );
+        }
+      }
+
+      function clearLocalStorageItemTest() {
+        const key = document.getElementById("localStorageKey").value;
+
+        if (!key) {
+          showStatus("localStorageStatus", "请输入要删除的键", "error");
+          return;
+        }
+
+        try {
+          localStorage.removeItem(key);
+          showStatus(
+            "localStorageStatus",
+            `已删除本地存储项: ${key}`,
+            "success"
+          );
+          getLocalStorageTest();
+        } catch (e) {
+          showStatus(
+            "localStorageStatus",
+            `删除本地存储项失败: ${e.message}`,
+            "error"
+          );
+        }
+      }
+
+      function clearAllLocalStorageTest() {
+        try {
+          localStorage.clear();
+          showStatus("localStorageStatus", "已清除所有本地存储", "success");
+          getLocalStorageTest();
+        } catch (e) {
+          showStatus(
+            "localStorageStatus",
+            `清除本地存储失败: ${e.message}`,
+            "error"
+          );
+        }
+      }
+
+      // SessionStorage 操作函数
+      function setSessionStorageTest() {
+        const key = document.getElementById("sessionStorageKey").value;
+        const value = document.getElementById("sessionStorageValue").value;
+
+        if (!key || !value) {
+          showStatus("sessionStorageStatus", "请输入键和值", "error");
+          return;
+        }
+
+        try {
+          sessionStorage.setItem(key, value);
+          showStatus(
+            "sessionStorageStatus",
+            `已设置会话存储: ${key}=${value}`,
+            "success"
+          );
+          getSessionStorageTest();
+        } catch (e) {
+          showStatus(
+            "sessionStorageStatus",
+            `设置会话存储失败: ${e.message}`,
+            "error"
+          );
+        }
+      }
+
+      function getSessionStorageTest() {
+        try {
+          const storageObj = {};
+          for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            storageObj[key] = sessionStorage.getItem(key);
+          }
+          document.getElementById("sessionStorageDisplay").textContent =
+            JSON.stringify(storageObj, null, 2);
+        } catch (e) {
+          showStatus(
+            "sessionStorageStatus",
+            `获取会话存储失败: ${e.message}`,
+            "error"
+          );
+        }
+      }
+
+      function clearSessionStorageItemTest() {
+        const key = document.getElementById("sessionStorageKey").value;
+
+        if (!key) {
+          showStatus("sessionStorageStatus", "请输入要删除的键", "error");
+          return;
+        }
+
+        try {
+          sessionStorage.removeItem(key);
+          showStatus(
+            "sessionStorageStatus",
+            `已删除会话存储项: ${key}`,
+            "success"
+          );
+          getSessionStorageTest();
+        } catch (e) {
+          showStatus(
+            "sessionStorageStatus",
+            `删除会话存储项失败: ${e.message}`,
+            "error"
+          );
+        }
+      }
+
+      function clearAllSessionStorageTest() {
+        try {
+          sessionStorage.clear();
+          showStatus("sessionStorageStatus", "已清除所有会话存储", "success");
+          getSessionStorageTest();
+        } catch (e) {
+          showStatus(
+            "sessionStorageStatus",
+            `清除会话存储失败: ${e.message}`,
+            "error"
+          );
+        }
+      }
+
+      // 批量操作函数
+      function setTestData() {
+        // 设置Cookies
+        document.cookie = "testCookie1=value1; path=/";
+        document.cookie = "testCookie2=value2; path=/";
+        document.cookie = "testCookie3=value3; path=/";
+
+        // 设置localStorage
+        localStorage.setItem("testLocalStorage1", "本地存储值1");
+        localStorage.setItem("testLocalStorage2", "本地存储值2");
+        localStorage.setItem(
+          "testLocalStorage3",
+          JSON.stringify({ complex: "对象", with: ["数组", "元素"] })
+        );
+
+        // 设置sessionStorage
+        sessionStorage.setItem("testSessionStorage1", "会话存储值1");
+        sessionStorage.setItem("testSessionStorage2", "会话存储值2");
+        sessionStorage.setItem(
+          "testSessionStorage3",
+          JSON.stringify({ another: "对象", with: 123 })
+        );
+
+        showStatus("batchStatus", "已设置测试数据", "success");
+
+        // 刷新所有显示
+        getAllCookiesTest();
+        getLocalStorageTest();
+        getSessionStorageTest();
+      }
+
+      function clearAllData() {
+        // 清除所有Cookies
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i];
+          const eqPos = cookie.indexOf("=");
+          const name =
+            eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+          document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        }
+
+        // 清除localStorage和sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+
+        showStatus("batchStatus", "已清除所有数据", "success");
+
+        // 刷新所有显示
+        getAllCookiesTest();
+        getLocalStorageTest();
+        getSessionStorageTest();
+      }
+
+      // 辅助函数
+      function showStatus(elementId, message, type) {
+        const statusElement = document.getElementById(elementId);
+        statusElement.textContent = message;
+        statusElement.className = "status " + type;
+
+        // 3秒后自动清除成功消息
+        if (type === "success") {
+          setTimeout(() => {
+            statusElement.textContent = "";
+            statusElement.className = "status";
+          }, 3000);
+        }
+      }
+
+      // 初始化页面时执行
+      window.onload = function () {
+        getAllCookiesTest();
+        getLocalStorageTest();
+        getSessionStorageTest();
+      };
+    </script>
+  </body>
+</html>

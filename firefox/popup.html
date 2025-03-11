@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>饼干盒子</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="cookie-manager-panel">
+      <div id="cookie-manager-header">
+        <div id="cookie-manager-title">
+          饼干盒子 - <span id="current-hostname"></span>
+        </div>
+      </div>
+      <div id="cookie-manager-content">
+        <div class="cookie-manager-tab-container">
+          <div
+            class="cookie-manager-tab cookie-manager-active"
+            data-tab="export"
+          >
+            导出
+          </div>
+          <div class="cookie-manager-tab" data-tab="import">导入</div>
+          <div class="cookie-manager-tab" data-tab="profiles">配置管理</div>
+        </div>
+
+        <div
+          class="cookie-manager-tab-content cookie-manager-active"
+          id="export-tab"
+        >
+          <div class="cookie-manager-input-group">
+            <label>导出格式</label>
+            <select id="export-format">
+              <option value="cookie-editor">
+                Cookie-Editor格式 (仅Cookie)
+              </option>
+              <option value="json">JSON格式 (Cookie+Storage)</option>
+              <option value="base64">Base64加密 (Cookie+Storage)</option>
+            </select>
+          </div>
+          <div class="cookie-manager-input-group">
+            <label>数据内容</label>
+            <textarea id="export-data" readonly></textarea>
+          </div>
+          <button id="btn-export" class="cookie-manager-btn">获取数据</button>
+          <button id="btn-copy" class="cookie-manager-btn">复制到剪贴板</button>
+        </div>
+
+        <div class="cookie-manager-tab-content" id="import-tab">
+          <div class="cookie-manager-input-group">
+            <label>导入格式</label>
+            <select id="import-format">
+              <option value="auto">自动检测</option>
+              <option value="cookie-editor">
+                Cookie-Editor格式 (仅Cookie)
+              </option>
+              <option value="json">JSON格式 (Cookie+Storage)</option>
+              <option value="base64">Base64加密 (Cookie+Storage)</option>
+            </select>
+          </div>
+          <div class="cookie-manager-input-group">
+            <label>数据内容</label>
+            <textarea
+              id="import-data"
+              placeholder="请粘贴要导入的数据..."
+            ></textarea>
+          </div>
+          <button id="btn-import" class="cookie-manager-btn">导入数据</button>
+          <button id="btn-import-profile" class="cookie-manager-btn">
+            另存为配置
+          </button>
+        </div>
+
+        <div class="cookie-manager-tab-content" id="profiles-tab">
+          <div class="cookie-manager-input-group">
+            <label>创建新配置</label>
+            <div class="cookie-manager-inline-form">
+              <input
+                type="text"
+                id="profile-name"
+                placeholder="输入配置名称..."
+              />
+              <button id="btn-create-profile" class="cookie-manager-btn">
+                创建配置
+              </button>
+            </div>
+          </div>
+
+          <div id="profiles-container" class="cookie-manager-input-group">
+            <div class="cookie-manager-header-row">
+              <label
+                >已保存的配置（<span id="profiles-hostname"></span>）</label
+              >
+              <input
+                type="text"
+                id="profile-search"
+                placeholder="搜索配置..."
+              />
+            </div>
+            <div id="profiles-list">
+              <!-- 配置列表将动态加载 -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="notification"></div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
