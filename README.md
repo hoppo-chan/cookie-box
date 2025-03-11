@@ -5,6 +5,7 @@
 # <font color=#CD853F size=72><center>cookie-box 饼干盒子</center></font>
 
 ### 一个用于 cookie 分享和多账号管理的工具，支持使用 Cookie-Editor 格式，同时独家支持导出导入本地存储和会话存储，用于类似 juchats 讲 token 写在本地存储网站的账号切换。可以使用在 chrome(包括 edge)、firefox、和所有支持篡改猴的浏览器。
+![ui](https://raw.githubusercontent.com/hoppo-chan/cookie-box/refs/heads/main/image/04.png)
 
 #### 推荐使用浏览器插件，篡改猴如果用第三方比如“脚本猫”会没有权限获取 cookie
 
