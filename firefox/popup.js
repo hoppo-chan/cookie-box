@@ -425,8 +425,32 @@ async function importData() {
       console.error("导入数据解析失败:", error);
       throw new Error(`解析数据失败: ${error.message}`);
     }
+
+    // 验证数据
+    if (!data) {
+      console.error("无效的数据格式：数据为空");
+      showNotification("无效的数据格式：数据为空", "error");
+      return;
+    }
+
+    // 确保cookies和storage字段存在，即使是空的
+    if (!Array.isArray(data.cookies) && typeof data.cookies !== "undefined") {
+      console.error("无效的数据格式：cookies必须是数组");
+      showNotification("无效的数据格式：cookies必须是数组", "error");
+      return;
+    }
+
+    if (
+      typeof data.storage !== "undefined" &&
+      (!data.storage || typeof data.storage !== "object")
+    ) {
+      console.error("无效的数据格式：storage必须是对象");
+      showNotification("无效的数据格式：storage必须是对象", "error");
+      return;
+    }
   } catch (error) {
-    showNotification(`导入失败: ${error.message}`, "error");
+    console.error("导入失败:", error);
+    showNotification(`导失败: ${error.message}`, "error");
   }
 }
 
@@ -451,10 +475,10 @@ async function importCookieEditorFormat(cookies) {
       return hasRequiredFields;
     });
 
-    if (validCookies.length === 0) {
-      console.warn("没有有效的cookie对象可以导入");
-      throw new Error("没有找到有效的cookie数据");
-    }
+    // if (validCookies.length === 0) {
+    //   console.warn("没有有效的cookie对象可以导入");
+    //   throw new Error("没有找到有效的cookie数据");
+    // }
 
     if (validCookies.length < cookies.length) {
       console.warn(
@@ -1087,9 +1111,25 @@ async function importAsProfile() {
     }
 
     // 验证数据
-    if (!data || (!data.cookies && !data.storage)) {
-      console.error("无效的数据格式");
-      showNotification("无效的数据格式", "error");
+    if (!data) {
+      console.error("无效的数据格式：数据为空");
+      showNotification("无效的数据格式：数据为空", "error");
+      return;
+    }
+
+    // 确保cookies和storage字段存在，即使是空的
+    if (!Array.isArray(data.cookies) && typeof data.cookies !== "undefined") {
+      console.error("无效的数据格式：cookies必须是数组");
+      showNotification("无效的数据格式：cookies必须是数组", "error");
+      return;
+    }
+
+    if (
+      typeof data.storage !== "undefined" &&
+      (!data.storage || typeof data.storage !== "object")
+    ) {
+      console.error("无效的数据格式：storage必须是对象");
+      showNotification("无效的数据格式：storage必须是对象", "error");
       return;
     }
 

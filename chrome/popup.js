@@ -738,7 +738,9 @@ function renameProfile(oldName) {
 // 导入为配置
 async function importAsProfile() {
   try {
+    console.log("开始导入为配置...");
     const importData = document.getElementById("import-data").value.trim();
+    console.log("导入数据:", importData ? "有数据" : "无数据");
 
     if (!importData) {
       showNotification("请输入要导入的数据", "error");
@@ -749,20 +751,38 @@ async function importAsProfile() {
     // 尝试解析数据
     try {
       if (importFormat === "auto") {
+        console.log("使用自动检测格式");
         // 尝试作为Base64解码
         try {
           // 增加对Unicode字符的支持
           const decoded = decodeURIComponent(escape(atob(importData)));
           data = JSON.parse(decoded);
+          console.log("成功解析为Base64格式");
           if (data.cookies || data.storage) {
+            console.log("检测到完整格式数据");
             data = data;
+          } else if (Array.isArray(data)) {
+            console.log("检测到Cookie-Editor格式数据");
+            data = {
+              cookies: data,
+              storage: { localStorage: {}, sessionStorage: {} },
+            };
           } else {
             throw new Error("无法识别的数据格式");
           }
         } catch (e) {
+          console.log("Base64解析失败, 尝试JSON解析", e);
           // 尝试作为JSON解析
           data = JSON.parse(importData);
-          if (!Array.isArray(data) && !(data.cookies || data.storage)) {
+          console.log("JSON解析结果:", data);
+          if (Array.isArray(data)) {
+            // Cookie-Editor格式
+            console.log("检测到Cookie-Editor格式数据");
+            data = {
+              cookies: data,
+              storage: { localStorage: {}, sessionStorage: {} },
+            };
+          } else if (!(data.cookies || data.storage)) {
             throw new Error("无法识别的数据格式");
           }
         }
@@ -776,27 +796,54 @@ async function importAsProfile() {
           throw new Error("Cookie-Editor格式应该是数组");
         }
         // 转换为完整格式
-        data = { cookies: data };
+        data = {
+          cookies: data,
+          storage: { localStorage: {}, sessionStorage: {} },
+        };
       } else if (importFormat === "json") {
         data = JSON.parse(importData);
+        if (Array.isArray(data)) {
+          // 可能是Cookie-Editor格式的JSON
+          data = {
+            cookies: data,
+            storage: { localStorage: {}, sessionStorage: {} },
+          };
+        }
       }
+
+      // 验证数据
+      if (!data || (!data.cookies && !data.storage)) {
+        console.error("无效的数据格式");
+        showNotification("无效的数据格式", "error");
+        return;
+      }
+
+      console.log("解析后的数据:", data);
 
       // 弹出提示框获取配置名称
       const profileName = prompt("请输入配置名称");
 
       if (!profileName) {
+        console.log("用户取消了操作");
         return; // 用户取消了操作
       }
 
+      console.log(`保存配置: "${profileName}"`);
+
       // 保存配置
-      saveProfileData(profileName, data.cookies, data.storage);
+      saveProfileData(
+        profileName,
+        data.cookies || [],
+        data.storage || { localStorage: {}, sessionStorage: {} }
+      );
 
       // 应用配置并刷新页面
       await applyProfile(profileName, {
-        cookies: data.cookies,
-        storage: data.storage,
+        cookies: data.cookies || [],
+        storage: data.storage || { localStorage: {}, sessionStorage: {} },
       });
 
+      console.log("导入为配置完成");
       // 清空导入数据
       document.getElementById("import-data").value = "";
     } catch (error) {
@@ -917,12 +964,25 @@ function initEvents() {
 // 初始化
 document.addEventListener("DOMContentLoaded", async () => {
   try {
+    // 获取当前标签页
+    const tabs = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    currentTab = tabs[0];
+
+    // 更新主机名显示
+    updateHostnameDisplay();
+
     // 检查content script状态
     await ensureContentScriptLoaded();
 
     // 初始化UI和事件
     initTabs();
     initEvents();
+
+    // 加载配置列表
+    loadProfiles();
 
     // 初始加载时自动导出数据
     exportData();
